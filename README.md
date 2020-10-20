@@ -11,15 +11,15 @@ The procedure consists of 4 steps:
 ### Prerequisities
 Three variables need to be set at the top of the script:
 
-`VERSION` and `RELEASE`: the Alpine Linux version and dot release to be installed
+`VERSION` and `RELEASE`: the Alpine Linux version and dot release to be installed.
 
-`TFTP_IP`: the IP address of the TFTP server (if you use the included script, this is the address of the machine you're currently on)
+`TFTP_IP`: the IP address of the TFTP server (if you use the included script, this is the address of the machine you're currently on).
 
 `HTTP_IP`: the IP address of the HTTP server (both TFTP and HTTP servers can run on the same machine/IP,
-and if you use the included script, this is the address of the machine you're currently on)
+and if you use the included script, this is the address of the machine you're currently on).
 
-On top of setting these variables you need `python3` to server the http folder, and `dnsmasq` to serve the tftp folder with the included scripts.
-Alternatively you could use a HTTP server like apache or nginx, and a TFTP server like tftpd-hpa or atftpd.
+On top of setting these variables you need `python3` to serve the http folder, and `dnsmasq` to serve the tftp folder with the included scripts.
+Alternatively you could use an HTTP server like apache or nginx, and a TFTP server like tftpd-hpa or atftpd.
 Further the script is using `wget`, `tar`, `unsquashfs`, `cpio`, and `gzip`, so check if those are available on your system.
 
 
@@ -37,8 +37,8 @@ Now apply the new configuration to the EEPROM image file and flash the bootloade
 
 
 ## Step 2: Create the TFTP and HTTP folders
-All the hard work in this step is already done by [erincandescent](https://gist.github.com/erincandescent/c3266fc3cbb7fe21be0ab1def7adbc48), so this is simple.
-just set the Alpine Linux version and your own TFTP and HTTP server ip addresses in the `create_tftp_http_dirs.sh` script and run it.
+All the hard work in this step is already done by [erincandescent](https://gist.github.com/erincandescent/c3266fc3cbb7fe21be0ab1def7adbc48) (thanks!),
+so this is simple for us. Just set the Alpine Linux version and your own TFTP and HTTP server ip addresses in the `create_tftp_http_dirs.sh` script and run it.
 
 
 ## Step 3: Serve the TFTP and HTTP folders
@@ -52,6 +52,7 @@ In the terminal that navigated to the HTTP folder use `$ ./python3_httpserver.sh
 ## Step 4: Initial setup of Alpine Linux
 When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root access. The rest of this step is just a copy from
 (https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation):
+
 Once you know the IP address, you should be able to ssh to the pi as root without a password and continue setup. Do not run the setup-alpine script directly since networking and sshd are already started. The setup script isn't expecting this and things go wrong during the network and repo setup steps. I would recommend running the /sbin/setup-* scripts one at a time, in the following order:
 
 ```
