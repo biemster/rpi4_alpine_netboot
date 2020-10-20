@@ -1,18 +1,100 @@
 # Netboot Alpine Linux on Raspberry Pi 4
 This script will set up two folders, one to be served over TFTP, and the other over HTTP. The rpi4 will boot without SD card, or any storage attached.
 
-## Steps
+### Steps
 The procedure consists of 4 steps:
 1. Prepare the Raspberry Pi 4
-2. Run the `...` script to set up the TFTP and HTTP folders
-3. configure the TFTP server
-4. configure the HTTP server
+2. Run the `create_tftp_http_dirs.sh` script to set up the TFTP and HTTP folders
+3. serve the TFTP and HTTP folders with the application of your choice
+4. do the initial setup of Alpine Linux on your Pi, and serve the newly created overlay in the HTTP folder
 
-## Prerequisities
+### Prerequisities
 Three variables need to be set at the top of the script:
 
-`VERSION`: the Alpine Linux version to be installed
+`VERSION` and `RELEASE`: the Alpine Linux version and dot release to be installed
 
-`TFTP_IP`: the IP address of the TFTP server
+`TFTP_IP`: the IP address of the TFTP server (if you use the included script, this is the address of the machine you're currently on)
 
-`HTTP_IP`: the IP address of the HTTP server (both TFTP and HTTP servers can run on the same machine/IP)
+`HTTP_IP`: the IP address of the HTTP server (both TFTP and HTTP servers can run on the same machine/IP,
+and if you use the included script, this is the address of the machine you're currently on)
+
+On top of setting these variables you need `python3` to server the http folder, and `dnsmasq` to serve the tftp folder with the included scripts.
+Alternatively you could use a HTTP server like apache or nginx, and a TFTP server like tftpd-hpa or atftpd.
+Further the script is using `wget`, `tar`, `unsquashfs`, `cpio`, and `gzip`, so check if those are available on your system.
+
+
+## Step 1: Prepare the Raspberry Pi 4
+With the Raspberry Pi 4, the bootloader resides in an on-board EEPROM, and not on the SD card anymore. More info here:
+(https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md)
+make sure you familiarize yourself with this info. On top of that page is explained how to update your bootloader to the latest stable
+version, follow these steps all up to, but not including, flashing the new bootloader to EEPROM.
+
+Before flashing the latest bootloader we need to make two changes to the `bootconf.txt` file, which you should now have if you followed the steps.
+We first need to add a line `TFTP_IP=<your tftp server ip goes here>` with the same ip address as used in the `create_tftp_http_dirs.sh` script.
+Second we need to change `BOOT_ORDER` to something that puts the network boot first. I put `BOOT_ORDER=0xf12`, so I can fallback on a SD card boot if necessary.
+
+Now apply the new configuration to the EEPROM image file and flash the bootloader, as explained on top of the linked page above. Now your Pi is ready to netboot!
+
+
+## Step 2: Create the TFTP and HTTP folders
+All the hard work in this step is already done by [erincandescent](https://gist.github.com/erincandescent/c3266fc3cbb7fe21be0ab1def7adbc48), so this is simple.
+just set the Alpine Linux version and your own TFTP and HTTP server ip addresses in the `create_tftp_http_dirs.sh` script and run it.
+
+
+## Step 3: Serve the TFTP and HTTP folders
+To serve the necessary files for the netboot process, open two terminal windows and navigate to the `tftp` and `http` folders you just created.
+
+In the terminal that navigated to the TFTP folder use `$ ./dnsmasq_tftpserver.sh`
+
+In the terminal that navigated to the HTTP folder use `$ ./python3_httpserver.sh`
+
+
+## Step 4: Initial setup of Alpine Linux
+When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root access. The rest of this step is just a copy from
+(https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation):
+Once you know the IP address, you should be able to ssh to the pi as root without a password and continue setup. Do not run the setup-alpine script directly since networking and sshd are already started. The setup script isn't expecting this and things go wrong during the network and repo setup steps. I would recommend running the /sbin/setup-* scripts one at a time, in the following order:
+
+```
+setup-ntp
+setup-keymap
+setup-hostname
+setup-timezone
+setup-apkrepos
+setup-lbu
+setup-apkcache
+```
+
+Set the root password and add a user that you can ssh with after the next reboot:
+
+```
+passwd
+adduser USERNAME
+```
+
+I would also recommend installing rng-tools and updating startup services:
+
+```
+apk add rng-tools
+rc-update add rngd boot
+rc-update add wpa_supplicant boot
+rc-update add urandom boot
+```
+
+Remove the local script service from the default runlevel and delete the headless setup script so it's not saved when the new overlay is created later:
+
+```
+rc-update del local default
+rm /etc/local.d/headless.start
+```
+
+Be sure to create a new overlay file and copy it to your HTTP folder before the first reboot:
+
+`lbu commit -d`
+
+In your `http` folder:
+
+`$ scp ...???`
+
+On your Pi:
+
+`reboot`
