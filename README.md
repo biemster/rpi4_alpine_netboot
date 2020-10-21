@@ -13,7 +13,7 @@ The procedure consists of 4 steps:
 ### Prerequisities
 Three variables need to be set at the top of the script:
 
-`VERSION` and `RELEASE`: the Alpine Linux version and dot release to be installed.
+`VERSION` and `RELEASE`: the Alpine Linux version and dot release to be installed. (Only works for v3.12.0 at this moment, due to hardcoded packages in step 2. Will be fixed soon)
 
 `TFTP_IP`: the IP address of the TFTP server (if you use the included script, this is the address of the machine you're currently on).
 
