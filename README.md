@@ -1,5 +1,6 @@
 # Netboot Alpine Linux on Raspberry Pi 4
 This script will set up two folders, one to be served over TFTP, and the other over HTTP. The rpi4 will boot without SD card, or any storage attached.
+No NFS server is needed, and the Pi will run completely independent of network and storage after booting.
 
 ### Steps
 The procedure consists of 4 steps:
@@ -7,6 +8,7 @@ The procedure consists of 4 steps:
 2. Run the `create_tftp_http_dirs.sh` script to set up the TFTP and HTTP folders
 3. serve the TFTP and HTTP folders with the application of your choice
 4. do the initial setup of Alpine Linux on your Pi, and serve the newly created overlay in the HTTP folder
+5. Optional: serve different overlays (configs) for each Pi you have
 
 ### Prerequisities
 Three variables need to be set at the top of the script:
@@ -94,8 +96,27 @@ Be sure to create a new overlay file and copy it to your HTTP folder before the 
 
 In your `http` folder:
 
-`$ scp ...???`
+!!!TODO: `$ scp ...???`
 
 On your Pi:
 
 `reboot`
+
+
+## Step 5: (Optional / Advanced) Create different overlays (configurations) for individual Pi's
+In most cases, having multiple Pi's means they need to do different tasks. It is very usefull to have different configurations sent to them,
+instead of having one big 'one size fits all' overlay for all of them.
+To achieve this, the individual Pi's need to be sent a unique `cmdline.txt` file pointing to a individual overlay tarball in the `apkovl` variable.
+You might have noticed in the `dnsmasq` output or your TFTP server logs that the Pi is first searching for the start4.elf file in a subfolder
+in the TFTP root:
+
+```
+tftp[5387] : file /home/biemster/rpi4_alpine_netboot/tftp/46e4bb06/start4.elf not found
+...
+```
+
+This 8 digit subfolder (46e4bb06 in this case) is actually the serial number of the Pi that is trying to netboot.
+Place a copy of the cmdline.txt in a subfolder that corresponds to the serial number of your Pi, and symlink the other
+files of the TFTP root folder in this subfolder as well. Now you can specify in the `apkovl` variable in the `cmdline.txt`
+which overlay tarball this specific Pi should boot, and don't forget to place that tarball in the `http` folder.
+
