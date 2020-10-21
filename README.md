@@ -52,7 +52,7 @@ In the terminal that navigated to the HTTP folder use `$ ./python3_httpserver.sh
 
 
 ## Step 4: Initial setup of Alpine Linux
-When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root access. The rest of this step is just a copy from
+When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root login. The rest of this step is just a copy from
 (https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation):
 
 Once you know the IP address, you should be able to ssh to the pi as root without a password and continue setup. Do not run the setup-alpine script directly since networking and sshd are already started. The setup script isn't expecting this and things go wrong during the network and repo setup steps. I would recommend running the /sbin/setup-* scripts one at a time, in the following order:
