@@ -65,36 +65,7 @@ chmod +x dnsmasq_tftpserver.sh
 # create files to be served over HTTP
 echo "* preparing HTTP folder"
 cd ${WORKDIR}
-tar xvzf ${REL_TAR} ./apks/aarch64/APKINDEX.tar.gz
-tar xvzf ${REL_TAR} ./apks/aarch64/alpine-base-3.12.0-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/alpine-baselayout-3.2.0-r6.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/alpine-conf-3.9.0-r1.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/alpine-keys-2.2-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/apk-tools-2.10.5-r1.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/busybox-1.31.1-r16.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/busybox-initscripts-3.2-r2.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/busybox-suid-1.31.1-r16.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/ca-certificates-bundle-20191127-r2.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/libc-utils-0.7.2-r3.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/libcrypto1.1-1.1.1g-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/libedit-20191231.3.1-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/libssl1.1-1.1.1g-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/libtls-standalone-2.9.1-r1.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/musl-1.1.24-r8.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/musl-utils-1.1.24-r8.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/ncurses-libs-6.2_p20200523-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/ncurses-terminfo-base-6.2_p20200523-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openrc-0.42.1-r10.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openssl-1.1.1g-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openssh-8.3_p1-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openssh-client-8.3_p1-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openssh-keygen-8.3_p1-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openssh-server-8.3_p1-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openssh-server-common-8.3_p1-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/openssh-sftp-server-8.3_p1-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/scanelf-1.2.6-r0.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/ssl_client-1.31.1-r16.apk
-tar xvzf ${REL_TAR} ./apks/aarch64/zlib-1.2.11-r3.apk
+tar xvzf ${REL_TAR} ./apks/
 mv apks http
 
 
