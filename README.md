@@ -52,55 +52,33 @@ In the terminal that navigated to the HTTP folder use `$ ./python3_httpserver.sh
 
 
 ## Step 4: Initial setup of Alpine Linux
-When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root login. The rest of this step is just a copy from
-(https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation):
+When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root login. The Alpine Wiki
+(https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation)
+suggests that `setup-alpine` will not work, and the `/sbin/setup-*` scripts should be called individually. In my experience `setup-alpine` actually
+works fine and calling the individual scripts gives error, so let's take the traditional route (fall back to the above link if the following does not work for you):
 
-Once you know the IP address, you should be able to ssh to the pi as root without a password and continue setup. Do not run the setup-alpine script directly since networking and sshd are already started. The setup script isn't expecting this and things go wrong during the network and repo setup steps. I would recommend running the /sbin/setup-* scripts one at a time, in the following order:
+`# setup-alpine`
 
-```
-setup-ntp
-setup-keymap
-setup-hostname
-setup-timezone
-setup-apkrepos
-setup-lbu
-setup-apkcache
-```
+and fill in the required info when asked for it. After that, create a new user:
 
-Set the root password and add a user that you can ssh with after the next reboot:
+`adduser <USERNAME>`
 
-```
-passwd
-adduser USERNAME
-```
-
-I would also recommend installing rng-tools and updating startup services:
-
-```
-apk add rng-tools
-rc-update add rngd boot
-rc-update add wpa_supplicant boot
-rc-update add urandom boot
-```
-
-Remove the local script service from the default runlevel and delete the headless setup script so it's not saved when the new overlay is created later:
+and remove the local script service from the defrault user level:
 
 ```
 rc-update del local default
 rm /etc/local.d/headless.start
 ```
 
-Be sure to create a new overlay file and copy it to your HTTP folder before the first reboot:
+Now create a new overlay with your Pi all set up:
 
-`lbu commit -d`
+!!!TODO fix this command `lbu commit -d`
 
-In your `http` folder:
+and transfer your new overlay file to the `http` folder on the machine that serves it:
 
-!!!TODO: `$ scp ...???`
+!!!TODO fix this command `user@webserver http$ scp <rpi_ip_here>:...`
 
-On your Pi:
-
-`reboot`
+and reboot your Pi.
 
 
 ## Step 5: (Optional / Advanced) Create different overlays (configurations) for individual Pi's
