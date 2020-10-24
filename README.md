@@ -63,7 +63,7 @@ and fill in the required info when asked for it. After that, create a new user:
 
 `adduser <USERNAME>`
 
-and remove the local script service from the defrault user level:
+and remove the local script service from the default user level:
 
 ```
 rc-update del local default
@@ -72,11 +72,16 @@ rm /etc/local.d/headless.start
 
 Now create a new overlay with your Pi all set up:
 
-!!!TODO fix this command `lbu commit -d`
+`LBU_BACKUPDIR=. lbu commit -d`
 
 and transfer your new overlay file to the `http` folder on the machine that serves it:
 
-!!!TODO fix this command `user@webserver http$ scp <rpi_ip_here>:...`
+`user@webserver http$ scp root@<rpi_ip_here>:~/<hostname_of_pi>.apkovl.tar.gz`
+
+where `<hostname_of_pi>` is the hostname you have set during the setup phase using `setup-alpine`. Now remove the `overlay.tar.gz` symlink in the `http` directory
+which still points to the initial overlay `overlay_ssh.tar.gz`, and recreate the symlink now pointing to the overlay you just created and downloaded:
+
+`ln -s <hostname_of_pi>.apkovl.tar.gz overlay.tar.gz`
 
 and reboot your Pi.
 
@@ -89,6 +94,7 @@ You might have noticed in the `dnsmasq` output or your TFTP server logs that the
 in the TFTP root:
 
 ```
+...
 tftp[5387] : file /home/biemster/rpi4_alpine_netboot/tftp/46e4bb06/start4.elf not found
 ...
 ```
