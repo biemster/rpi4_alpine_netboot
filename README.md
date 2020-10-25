@@ -59,9 +59,12 @@ works fine and calling the individual scripts gives error, so let's take the tra
 
 `# setup-alpine`
 
-and fill in the required info when asked for it. After that, create a new user:
+and fill in the required info when asked for it. After that, create a new user and have its home dir copied in the overlay later on:
 
-`adduser <USERNAME>`
+```
+adduser <USERNAME>
+lbu include /home/<USERNAME>
+```
 
 and remove the local script service from the default user level:
 
@@ -76,7 +79,7 @@ Now create a new overlay with your Pi all set up:
 
 and transfer your new overlay file to the `http` folder on the machine that serves it:
 
-`user@webserver http$ scp root@<rpi_ip_here>:~/<hostname_of_pi>.apkovl.tar.gz`
+`user@webserver http$ scp root@<rpi_ip_here>:~/<hostname_of_pi>.apkovl.tar.gz .`
 
 where `<hostname_of_pi>` is the hostname you have set during the setup phase using `setup-alpine`. Now remove the `overlay.tar.gz` symlink in the `http` directory
 which still points to the initial overlay `overlay_ssh.tar.gz`, and recreate the symlink now pointing to the overlay you just created and downloaded:
