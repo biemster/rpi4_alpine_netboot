@@ -14,6 +14,8 @@ RELEASE=0
 TFTP_IP=192.168.1.2
 HTTP_IP=192.168.1.2
 
+MODULES_INITRAMFS=("net/packet/af_packet.ko") # af_packet.ko is necessary, add additional if required
+
 #####
 # download the release, if not already present
 REL_TAR=alpine-rpi-${VERSION}.${RELEASE}-aarch64.tar.gz
@@ -39,7 +41,11 @@ ln -s boot/vmlinuz-rpi4
 tar xvzf ../${REL_TAR} ./boot/modloop-rpi4 # kernel modules
 tar xvzf ../${REL_TAR} ./boot/initramfs-rpi4 # initramfs
 mkdir modloop-rpi4
-unsquashfs -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*' 'modules/*/kernel/net/packet/af_packet.ko'
+unsquashfs -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*'
+for mod in "${MODULES_INITRAMFS[@]}"
+do
+	unsquashfs -f -d modloop-rpi4/lib boot/modloop-rpi4 "modules/*/kernel/${mod}"
+done
 (cd modloop-rpi4 && find . | cpio -H newc -ov | gzip) > initramfs-ext-rpi4
 cat boot/initramfs-rpi4 initramfs-ext-rpi4 > initramfs-rpi4-netboot
 

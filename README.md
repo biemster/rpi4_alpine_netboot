@@ -9,6 +9,7 @@ The procedure consists of 4 steps:
 3. serve the TFTP and HTTP folders with the application of your choice
 4. do the initial setup of Alpine Linux on your Pi, and serve the newly created overlay in the HTTP folder
 5. Optional: serve different overlays (configs) for each Pi you have
+6. Optional: add kernel modules to the initramfs
 
 ### Prerequisities
 Three variables need to be set at the top of the script:
@@ -55,7 +56,7 @@ In the terminal that navigated to the HTTP folder use `$ ./python3_httpserver.sh
 When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root login. The Alpine Wiki
 (https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation)
 suggests that `setup-alpine` will not work, and the `/sbin/setup-*` scripts should be called individually. In my experience `setup-alpine` actually
-works fine and calling the individual scripts gives error, so let's take the traditional route (fall back to the above link if the following does not work for you):
+works fine, so let's take the traditional route (fall back to the above link if the following does not work for you):
 
 `# setup-alpine`
 
@@ -107,3 +108,11 @@ Place a copy of the cmdline.txt in a subfolder that corresponds to the serial nu
 files of the TFTP root folder in this subfolder as well. Now you can specify in the `apkovl` variable in the `cmdline.txt`
 which overlay tarball this specific Pi should boot, and don't forget to place that tarball in the `http` folder.
 
+
+## Step 6: Add additional kernel modules to the initramfs
+Undoubtedly you'll need additional kernel modules when you progress setting up your Pi. Those need to be added to the `initramfs`,
+in the `create_tftp_http_dirs.sh` script's `MODULES_INITRAMFS` variable, like this (SPI modules are taken as example):
+```
+MODULES_INITRAMFS=("net/packet/af_packet.ko" # af_packet.ko is necessary, add additional if required
+	"drivers/spi")
+```
