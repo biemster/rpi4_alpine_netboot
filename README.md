@@ -109,7 +109,7 @@ files of the TFTP root folder in this subfolder as well. Now you can specify in 
 which overlay tarball this specific Pi should boot, and don't forget to place that tarball in the `http` folder.
 
 
-## Step 6: Add additional kernel modules to the initramfs
+## Step 6: (Optional / Advanced) Add additional kernel modules to the initramfs
 Undoubtedly you'll need additional kernel modules when you progress setting up your Pi. Those need to be added to the `initramfs`,
 in the `create_tftp_http_dirs.sh` script's `MODULES_INITRAMFS` variable, like this (SPI modules are taken as example):
 ```
