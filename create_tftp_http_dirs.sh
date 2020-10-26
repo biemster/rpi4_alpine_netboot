@@ -36,7 +36,7 @@ tar xvzf ../${REL_TAR} ./boot/vmlinuz-rpi4 # kernel
 ln -s boot/vmlinuz-rpi4
 
 # the initramfs needs af_packet.ko added:
-tar xvzf ../${REL_TAR} ./boot/modloop-rpi4 # kernel
+tar xvzf ../${REL_TAR} ./boot/modloop-rpi4 # kernel modules
 tar xvzf ../${REL_TAR} ./boot/initramfs-rpi4 # initramfs
 mkdir modloop-rpi4
 unsquashfs -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*' 'modules/*/kernel/net/packet/af_packet.ko'
@@ -93,8 +93,8 @@ __create_eni()
 	auto lo
 	iface lo inet loopback
 
-	auto ${iface}
-	iface ${iface} inet dhcp
+	auto eth0
+	iface eth0 inet dhcp
 	        hostname localhost
 	EOF
 }
@@ -107,7 +107,6 @@ __edit_ess()
 	EOF
 }
 
-iface="eth0"
 __create_eni
 rc-service networking start
 
