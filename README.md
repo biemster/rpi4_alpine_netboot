@@ -76,7 +76,7 @@ rm /etc/local.d/headless.start
 
 Now create a new overlay with your Pi all set up:
 
-`LBU_BACKUPDIR=. lbu commit -d`
+`lbu package`
 
 and transfer your new overlay file to the `http` folder on the machine that serves it:
 
