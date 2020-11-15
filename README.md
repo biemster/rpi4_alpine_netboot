@@ -110,7 +110,19 @@ which overlay tarball this specific Pi should boot, and don't forget to place th
 
 
 ## Step 6: (Optional / Advanced) Add additional kernel modules to the initramfs
-Undoubtedly you'll need additional kernel modules when you progress setting up your Pi. Those need to be added to the `initramfs`,
+Undoubtedly you'll need additional kernel modules when you progress setting up your Pi. There are two options to do this, an easy option
+with a bit of overhead (20MB), and an option without overhead which requires knowing exactly which modules are needed.
+
+Option 1: Easy but with a bit of overhead. Add a symlink to the modloop to the `http` folder:
+```
+user@webserver http$ ln -s ../tftp/boot/modloop-rpi4
+```
+and add the following option to your `cmdline.txt`, right after `ip=dhcp` (don't forget to put in your http server ip, and correct the version):
+```
+modloop=http://<http_ip_goes_here>/alpine/v3.12/main/modloop-rpi4
+```
+
+Option 2: Requires exact list of needed modules, but adds no overhead. The modules need to be added to the `initramfs`,
 in the `create_tftp_http_dirs.sh` script's `MODULES_INITRAMFS` variable, like this (SPI modules are taken as example):
 ```
 MODULES_INITRAMFS=("net/packet/af_packet.ko" # af_packet.ko is necessary, add additional if required
