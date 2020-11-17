@@ -10,7 +10,7 @@
 #####
 # change these values to match your setup
 VERSION=3.12
-RELEASE=0
+RELEASE=1
 TFTP_IP=192.168.1.2
 HTTP_IP=192.168.1.2
 
@@ -57,7 +57,7 @@ arm_64bit=1
 EOF
 
 cat << EOF >> cmdline.txt
-modules=loop,squashfs,sd-mod,usb-storage console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_IP}/alpine/v${VERSION}/main apkovl=http://${HTTP_IP}/alpine/v${VERSION}/main/overlay.tar.gz
+modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_IP}/alpine/v${VERSION}/main apkovl=http://${HTTP_IP}/alpine/v${VERSION}/main/overlay.tar.gz
 EOF
 
 cat << EOF >> dnsmasq_tftpserver.sh
