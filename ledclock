@@ -1,0 +1,21 @@
+#!/sbin/openrc-run
+
+command=/home/lars/clock.py
+pidfile=/var/run/ledclock.pid
+description="Show clock on LED ring"
+
+start() {
+	ebegin "Starting LED clock"
+	start-stop-daemon --start --exec ${command} \
+		--pidfile ${pidfile} --make-pidfile \
+		--background --name python3
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping LED clock"
+	start-stop-daemon --stop --exec ${command} \
+		--pidfile ${pidfile}
+	eend $?
+}
+

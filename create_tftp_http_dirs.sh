@@ -14,7 +14,22 @@ RELEASE=1
 TFTP_IP=192.168.1.2
 HTTP_IP=192.168.1.2
 
-MODULES_INITRAMFS=("net/packet/af_packet.ko") # af_packet.ko is necessary, add additional if required
+MODULES_INITRAMFS=("net/packet/af_packet.ko"
+					"drivers/spi"
+					"drivers/i2c"
+					"drivers/media/mc/mc.ko"
+					"drivers/media/spi/cxd2880-spi.ko"
+					"drivers/media/dvb-core/dvb-core.ko"
+					"drivers/media/dvb-frontends/cxd2880/cxd2880.ko"
+					"sound/soc/bcm/snd-soc-bcm2835-i2s.ko"
+					"sound/soc/generic/snd-soc-simple-card-utils.ko"
+					"sound/soc/snd-soc-core.ko"
+					"sound/core/snd-pcm-dmaengine.ko"
+					"sound/core/snd-pcm.ko"
+					"sound/core/snd-timer.ko"
+					"sound/core/snd-compress.ko"
+					"sound/core/snd.ko")
+					# af_packet.ko is necessary, add additional if required
 
 #####
 # download the release, if not already present
