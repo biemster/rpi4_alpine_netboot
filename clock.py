@@ -56,6 +56,10 @@ def show_time(leds, hours,minutes,seconds):
     if minutes >= 45:
         led_hours = (led_hours +1) % NLEDS
 
+    # progress minutess hand on second part of 5 minute interval
+    if (minutes % 5) > 2:
+        led_minutes = (led_minutes +1) % NLEDS
+
     colors = [(0,0,0)] * NLEDS
     colors[led_hours] = add_color(hour_color, colors[led_hours])
     colors[led_minutes] = add_color(minute_color, colors[led_minutes])

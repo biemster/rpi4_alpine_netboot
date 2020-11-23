@@ -5,7 +5,7 @@ command_args="-lkp 3333 -e /bin/ash -c"
 pipekiller_on_sigpipe="| { tee -p ; pkill -n -s0 ; }"
 pipe_to_gzip="| /bin/gzip -5"
 pipe_to_sox="| sox -t raw -e signed-integer -b 32 -L -r 48000 -c 4 - -t vorbis - ${pipekiller_on_sigpipe}"
-pipe_to_faac="| faac -v0 -P -B32 -C4 -R48000 - -o - ${pipekiller_on_sigpipe}"
+pipe_to_faac="| faac -v0 -P -B32 -X -C4 -R48000 - -o - ${pipekiller_on_sigpipe}"
 command_run_by_nc="/usr/bin/arecord -Dhw:0 -f S32_LE -r 48000 -c4 --buffer-time=5000 ${pipe_to_faac}"
 pidfile=/var/run/micdaemon.pid
 description="Serve the microphone over the network on port 3333"
