@@ -57,7 +57,7 @@ arm_64bit=1
 EOF
 
 cat << EOF >> cmdline.txt
-modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_IP}/alpine/v${VERSION}/main apkovl=http://${HTTP_IP}/alpine/v${VERSION}/main/overlay.tar.gz
+modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_IP}/alpine/v${VERSION}/main apkovl=http://${HTTP_IP}/overlay.tar.gz
 EOF
 
 cat << EOF >> dnsmasq_tftpserver.sh

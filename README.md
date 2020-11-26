@@ -51,6 +51,8 @@ In the terminal that navigated to the TFTP folder use `$ ./dnsmasq_tftpserver.sh
 
 In the terminal that navigated to the HTTP folder use `$ ./python3_httpserver.sh`
 
+Alternatively both can run in a single terminal as well: `user@pc rpi4_alpine_netboot$ tftp/dnsmasq_tftpserver.sh & http/python3_httpserver.sh`
+
 
 ## Step 4: Initial setup of Alpine Linux
 When all went well and the Pi booted up, it's listening on SSH and accepting passwordless root login. The Alpine Wiki
