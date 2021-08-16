@@ -11,20 +11,19 @@ set -euo pipefail
 
 #####
 # change these values to match your setup
-VERSION=3.12
-RELEASE=1
-TFTP_IP=192.168.1.2
-HTTP_IP=192.168.1.2
+ALPINE_VERSION=3.12
+ALPINE_RELEASE=1
+HTTP_SERVER_IP=192.168.1.2
 
 MODULES_INITRAMFS=("net/packet/af_packet.ko") # af_packet.ko is necessary, add additional if required
 
 #####
 # download the release, if not already present
-REL_TAR=alpine-rpi-${VERSION}.${RELEASE}-aarch64.tar.gz
+REL_TAR=alpine-rpi-${ALPINE_VERSION}.${ALPINE_RELEASE}-aarch64.tar.gz
 WORKDIR=$(pwd)
 if [ ! -e ${REL_TAR} ]
 then
-	wget http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/releases/aarch64/${REL_TAR}
+	wget https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/releases/aarch64/${REL_TAR}
 fi
 
 
@@ -59,7 +58,7 @@ arm_64bit=1
 EOF
 
 cat << EOF >> cmdline.txt
-modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_IP}/alpine/v${VERSION}/main apkovl=http://${HTTP_IP}/overlay.tar.gz
+modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_SERVER_IP}/alpine/v${ALPINE_VERSION}/main apkovl=http://${HTTP_SERVER_IP}/overlay.tar.gz
 EOF
 
 cat << EOF >> dnsmasq_tftpserver.sh
