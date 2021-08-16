@@ -19,13 +19,29 @@ MODULES_INITRAMFS=("net/packet/af_packet.ko") # af_packet.ko is necessary, add a
 
 #####
 # download the release, if not already present
-REL_TAR=alpine-rpi-${ALPINE_VERSION}.${ALPINE_RELEASE}-aarch64.tar.gz
-WORKDIR=$(pwd)
-if [ ! -e ${REL_TAR} ]
+if [ ${ALPINE_VERSION} == "latest-stable" ]
 then
-	wget https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/releases/aarch64/${REL_TAR}
+	LATEST_INFO=$(curl -sS https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/aarch64/latest-releases.yaml | yq --raw-output '.[] | select(.flavor == "alpine-rpi") | .version,.sha256')
+	ALPINE_VERSION=$(echo "$LATEST_INFO" | awk 'NR==1' | rev | cut -d"." -f2- | rev)
+	ALPINE_RELEASE=$(echo "$LATEST_INFO" | awk 'NR==1' | rev | cut -d"." -f1 | rev)
+REL_TAR=alpine-rpi-${ALPINE_VERSION}.${ALPINE_RELEASE}-aarch64.tar.gz
+	SHA256=$(echo "$LATEST_INFO" | awk 'NR==2')
+else
+	REL_TAR=alpine-rpi-${ALPINE_VERSION}.${ALPINE_RELEASE}-aarch64.tar.gz
+	SHA256=$(curl -sS "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/releases/aarch64/${REL_TAR}.sha256" | awk '{print $1}')
 fi
 
+WORKDIR=$(pwd)
+if [ ! -e "${REL_TAR}" ]
+then
+	wget "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/releases/aarch64/${REL_TAR}"
+fi
+
+if ! echo "${SHA256}  ${REL_TAR}" | sha256sum --check --status;
+then
+	echo "download checksum muismatch. aborting"
+	exit 1
+fi
 
 #####
 # create files to be served over TFTP
