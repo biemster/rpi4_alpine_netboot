@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2164,SC1039
+set -euo pipefail
 
 # This script will prepare two directories for netbooting Alpine Linux to a Raspberry Pi 4B.
 # One directory should be served over TFTP, the other over HTTP
@@ -29,13 +31,13 @@ fi
 #####
 # create files to be served over TFTP
 echo "* preparing TFTP folder"
-cd ${WORKDIR}
+cd "${WORKDIR}"
 mkdir tftp; cd tftp
 tar xvzf ../${REL_TAR} ./start4.elf # primary bootloader
 tar xvzf ../${REL_TAR} ./fixup4.dat # SDRAM setup
 tar xvzf ../${REL_TAR} ./bcm2711-rpi-4-b.dtb # device tree blob
 tar xvzf ../${REL_TAR} ./boot/vmlinuz-rpi4 # kernel
-ln -s boot/vmlinuz-rpi4
+ln -s boot/vmlinuz-rpi4 .
 
 # the initramfs needs af_packet.ko added:
 tar xvzf ../${REL_TAR} ./boot/modloop-rpi4 # kernel modules
@@ -70,7 +72,7 @@ chmod +x dnsmasq_tftpserver.sh
 #####
 # create files to be served over HTTP
 echo "* preparing HTTP folder"
-cd ${WORKDIR}
+cd "${WORKDIR}"
 tar xvzf ${REL_TAR} ./apks/
 mv apks http
 
@@ -85,7 +87,7 @@ mv apks http
 #         └── default
 #             └── local -> /etc/init.d/local
 echo "* creating initial overlay"
-cd ${WORKDIR}
+cd "${WORKDIR}"
 OVERLAY_DIR=overlay_ssh
 mkdir ${OVERLAY_DIR}; cd ${OVERLAY_DIR}
 
@@ -128,11 +130,11 @@ touch etc/.default_boot_services
 
 mkdir -p etc/runlevels/default
 cd etc/runlevels/default
-ln -s /etc/init.d/local
-cd ${WORKDIR}/${OVERLAY_DIR}
+ln -s /etc/init.d/local .
+cd "${WORKDIR}/${OVERLAY_DIR}"
 tar czvf overlay_ssh.tar.gz etc/
-cd ${WORKDIR}/http
-ln -s ../${OVERLAY_DIR}/overlay_ssh.tar.gz overlay.tar.gz
+cd "${WORKDIR}/http"
+ln -s "../${OVERLAY_DIR}/overlay_ssh.tar.gz" overlay.tar.gz
 
 cat << EOF >> python3_httpserver.sh
 #!/usr/bin/env bash
