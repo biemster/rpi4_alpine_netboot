@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2164,SC1039
+set -euo pipefail
 
 # This script will prepare two directories for netbooting Alpine Linux to a Raspberry Pi 4B.
 # One directory should be served over TFTP, the other over HTTP
@@ -9,39 +11,54 @@
 
 #####
 # change these values to match your setup
-VERSION=3.12
-RELEASE=1
-TFTP_IP=192.168.1.2
-HTTP_IP=192.168.1.2
+ALPINE_VERSION=3.12
+ALPINE_RELEASE=1
+HTTP_SERVER_IP=192.168.1.2
 
 MODULES_INITRAMFS=("net/packet/af_packet.ko") # af_packet.ko is necessary, add additional if required
 
 #####
 # download the release, if not already present
-REL_TAR=alpine-rpi-${VERSION}.${RELEASE}-aarch64.tar.gz
-WORKDIR=$(pwd)
-if [ ! -e ${REL_TAR} ]
+if [ ${ALPINE_VERSION} == "latest-stable" ]
 then
-	wget http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/releases/aarch64/${REL_TAR}
+	LATEST_INFO=$(curl -sS https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/aarch64/latest-releases.yaml | yq --raw-output '.[] | select(.flavor == "alpine-rpi") | .version,.sha256')
+	ALPINE_VERSION=$(echo "$LATEST_INFO" | awk 'NR==1' | rev | cut -d"." -f2- | rev)
+	ALPINE_RELEASE=$(echo "$LATEST_INFO" | awk 'NR==1' | rev | cut -d"." -f1 | rev)
+REL_TAR=alpine-rpi-${ALPINE_VERSION}.${ALPINE_RELEASE}-aarch64.tar.gz
+	SHA256=$(echo "$LATEST_INFO" | awk 'NR==2')
+else
+	REL_TAR=alpine-rpi-${ALPINE_VERSION}.${ALPINE_RELEASE}-aarch64.tar.gz
+	SHA256=$(curl -sS "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/releases/aarch64/${REL_TAR}.sha256" | awk '{print $1}')
 fi
 
+WORKDIR=$(pwd)
+if [ ! -e "${REL_TAR}" ]
+then
+	wget "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/releases/aarch64/${REL_TAR}"
+fi
+
+if ! echo "${SHA256}  ${REL_TAR}" | sha256sum --check --status;
+then
+	echo "download checksum muismatch. aborting"
+	exit 1
+fi
 
 #####
 # create files to be served over TFTP
 echo "* preparing TFTP folder"
-cd ${WORKDIR}
-mkdir tftp; cd tftp
-tar xvzf ../${REL_TAR} ./start4.elf # primary bootloader
-tar xvzf ../${REL_TAR} ./fixup4.dat # SDRAM setup
-tar xvzf ../${REL_TAR} ./bcm2711-rpi-4-b.dtb # device tree blob
-tar xvzf ../${REL_TAR} ./boot/vmlinuz-rpi4 # kernel
-ln -s boot/vmlinuz-rpi4
+cd "${WORKDIR}"
+mkdir -p tftp; cd tftp
+tar xvzf "../${REL_TAR}" ./start4.elf # primary bootloader
+tar xvzf "../${REL_TAR}" ./fixup4.dat # SDRAM setup
+tar xvzf "../${REL_TAR}" ./bcm2711-rpi-4-b.dtb # device tree blob
+tar xvzf "../${REL_TAR}" ./boot/vmlinuz-rpi4 # kernel
+ln -s boot/vmlinuz-rpi4 . 2>/dev/null || true
 
 # the initramfs needs af_packet.ko added:
-tar xvzf ../${REL_TAR} ./boot/modloop-rpi4 # kernel modules
-tar xvzf ../${REL_TAR} ./boot/initramfs-rpi4 # initramfs
-mkdir modloop-rpi4
-unsquashfs -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*'
+tar xvzf "../${REL_TAR}" ./boot/modloop-rpi4 # kernel modules
+tar xvzf "../${REL_TAR}" ./boot/initramfs-rpi4 # initramfs
+mkdir -p modloop-rpi4
+unsquashfs -f -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*'
 for mod in "${MODULES_INITRAMFS[@]}"
 do
 	unsquashfs -f -d modloop-rpi4/lib boot/modloop-rpi4 "modules/*/kernel/${mod}"
@@ -49,18 +66,18 @@ done
 (cd modloop-rpi4 && find . | cpio -H newc -ov | gzip) > initramfs-ext-rpi4
 cat boot/initramfs-rpi4 initramfs-ext-rpi4 > initramfs-rpi4-netboot
 
-cat << EOF >> config.txt
+cat << EOF > config.txt
 [pi4]
 kernel=vmlinuz-rpi4
 initramfs initramfs-rpi4-netboot
 arm_64bit=1
 EOF
 
-cat << EOF >> cmdline.txt
-modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_IP}/alpine/v${VERSION}/main apkovl=http://${HTTP_IP}/overlay.tar.gz
+cat << EOF > cmdline.txt
+modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_SERVER_IP}/alpine/v${ALPINE_VERSION}/main apkovl=http://${HTTP_SERVER_IP}/overlay.tar.gz
 EOF
 
-cat << EOF >> dnsmasq_tftpserver.sh
+cat << EOF > dnsmasq_tftpserver.sh
 #!/usr/bin/env bash
 sudo dnsmasq -kd -p 0 -C /dev/null -u nobody --enable-tftp --tftp-root=$(pwd)
 EOF
@@ -70,10 +87,11 @@ chmod +x dnsmasq_tftpserver.sh
 #####
 # create files to be served over HTTP
 echo "* preparing HTTP folder"
-cd ${WORKDIR}
-tar xvzf ${REL_TAR} ./apks/
-mv apks http
-
+cd "${WORKDIR}"
+mkdir -p http/apks
+tar xvzf "${REL_TAR}" ./apks/
+cp -R apks/* http/apks/
+rm -R apks/
 
 #####
 # create overlay to allow passwordless root login over ssh
@@ -85,12 +103,12 @@ mv apks http
 #         └── default
 #             └── local -> /etc/init.d/local
 echo "* creating initial overlay"
-cd ${WORKDIR}
+cd "${WORKDIR}"
 OVERLAY_DIR=overlay_ssh
-mkdir ${OVERLAY_DIR}; cd ${OVERLAY_DIR}
+mkdir -p ${OVERLAY_DIR}; cd ${OVERLAY_DIR}
 
 mkdir -p etc/local.d
-cat << EOF >> etc/local.d/headless.start
+cat << EOF > etc/local.d/headless.start
 #!/bin/sh
 
 __create_eni()
@@ -128,13 +146,13 @@ touch etc/.default_boot_services
 
 mkdir -p etc/runlevels/default
 cd etc/runlevels/default
-ln -s /etc/init.d/local
-cd ${WORKDIR}/${OVERLAY_DIR}
+ln -s /etc/init.d/local . 2>/dev/null || true
+cd "${WORKDIR}/${OVERLAY_DIR}"
 tar czvf overlay_ssh.tar.gz etc/
-cd ${WORKDIR}/http
-ln -s ../${OVERLAY_DIR}/overlay_ssh.tar.gz overlay.tar.gz
+cd "${WORKDIR}/http"
+ln -s "../${OVERLAY_DIR}/overlay_ssh.tar.gz" overlay.tar.gz 2>/dev/null || true
 
-cat << EOF >> python3_httpserver.sh
+cat << EOF > python3_httpserver.sh
 #!/usr/bin/env bash
 sudo python3 -m http.server 80
 EOF

@@ -11,19 +11,17 @@ The procedure consists of 4 steps:
 5. Optional: serve different overlays (configs) for each Pi you have
 6. Optional: add kernel modules to the initramfs
 
-### Prerequisities
+### Prerequisites
 Three variables need to be set at the top of the script:
 
-`VERSION` and `RELEASE`: the Alpine Linux version and dot release to be installed.
-
-`TFTP_IP`: the IP address of the TFTP server (if you use the included script, this is the address of the machine you're currently on).
+`VERSION` and `RELEASE`: the Alpine Linux version and dot release to be installed. You can also specify `VERSION=latest-stable` and the script will always pull the last stable Alpine release.
 
 `HTTP_IP`: the IP address of the HTTP server (both TFTP and HTTP servers can run on the same machine/IP,
 and if you use the included script, this is the address of the machine you're currently on).
 
 On top of setting these variables you need `python3` to serve the http folder, and `dnsmasq` to serve the tftp folder with the included scripts.
 Alternatively you could use an HTTP server like apache or nginx, and a TFTP server like tftpd-hpa or atftpd.
-Further the script is using `wget`, `tar`, `unsquashfs`, `cpio`, and `gzip`, so check if those are available on your system.
+Further the script is using `wget`, `tar`, `unsquashfs`, `cpio`, `gzip`, and `yq`, so check if those are available on your system.
 
 
 ## Step 1: Prepare the Raspberry Pi 4
@@ -93,7 +91,7 @@ and reboot your Pi.
 
 
 ## Step 5: (Optional / Advanced) Create different overlays (configurations) for individual Pi's
-In most cases, having multiple Pi's means they need to do different tasks. It is very usefull to have different configurations sent to them,
+In most cases, having multiple Pi's means they need to do different tasks. It is very useful to have different configurations sent to them,
 instead of having one big 'one size fits all' overlay for all of them.
 To achieve this, the individual Pi's need to be sent a unique `cmdline.txt` file pointing to a individual overlay tarball in the `apkovl` variable.
 You might have noticed in the `dnsmasq` output or your TFTP server logs that the Pi is first searching for the start4.elf file in a subfolder
