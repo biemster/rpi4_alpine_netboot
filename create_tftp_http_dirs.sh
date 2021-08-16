@@ -47,18 +47,18 @@ fi
 # create files to be served over TFTP
 echo "* preparing TFTP folder"
 cd "${WORKDIR}"
-mkdir tftp; cd tftp
+mkdir -p tftp; cd tftp
 tar xvzf ../${REL_TAR} ./start4.elf # primary bootloader
 tar xvzf ../${REL_TAR} ./fixup4.dat # SDRAM setup
 tar xvzf ../${REL_TAR} ./bcm2711-rpi-4-b.dtb # device tree blob
 tar xvzf ../${REL_TAR} ./boot/vmlinuz-rpi4 # kernel
-ln -s boot/vmlinuz-rpi4 .
+ln -s boot/vmlinuz-rpi4 . 2>/dev/null || true
 
 # the initramfs needs af_packet.ko added:
 tar xvzf ../${REL_TAR} ./boot/modloop-rpi4 # kernel modules
 tar xvzf ../${REL_TAR} ./boot/initramfs-rpi4 # initramfs
-mkdir modloop-rpi4
-unsquashfs -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*'
+mkdir -p modloop-rpi4
+unsquashfs -f -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*'
 for mod in "${MODULES_INITRAMFS[@]}"
 do
 	unsquashfs -f -d modloop-rpi4/lib boot/modloop-rpi4 "modules/*/kernel/${mod}"
@@ -66,18 +66,18 @@ done
 (cd modloop-rpi4 && find . | cpio -H newc -ov | gzip) > initramfs-ext-rpi4
 cat boot/initramfs-rpi4 initramfs-ext-rpi4 > initramfs-rpi4-netboot
 
-cat << EOF >> config.txt
+cat << EOF > config.txt
 [pi4]
 kernel=vmlinuz-rpi4
 initramfs initramfs-rpi4-netboot
 arm_64bit=1
 EOF
 
-cat << EOF >> cmdline.txt
+cat << EOF > cmdline.txt
 modules=loop,squashfs console=ttyS0,115200 ip=dhcp alpine_repo=http://${HTTP_SERVER_IP}/alpine/v${ALPINE_VERSION}/main apkovl=http://${HTTP_SERVER_IP}/overlay.tar.gz
 EOF
 
-cat << EOF >> dnsmasq_tftpserver.sh
+cat << EOF > dnsmasq_tftpserver.sh
 #!/usr/bin/env bash
 sudo dnsmasq -kd -p 0 -C /dev/null -u nobody --enable-tftp --tftp-root=$(pwd)
 EOF
@@ -88,9 +88,10 @@ chmod +x dnsmasq_tftpserver.sh
 # create files to be served over HTTP
 echo "* preparing HTTP folder"
 cd "${WORKDIR}"
+mkdir -p http/apks
 tar xvzf ${REL_TAR} ./apks/
-mv apks http
-
+cp -R apks/* http/apks/
+rm -R apks/
 
 #####
 # create overlay to allow passwordless root login over ssh
@@ -104,10 +105,10 @@ mv apks http
 echo "* creating initial overlay"
 cd "${WORKDIR}"
 OVERLAY_DIR=overlay_ssh
-mkdir ${OVERLAY_DIR}; cd ${OVERLAY_DIR}
+mkdir -p ${OVERLAY_DIR}; cd ${OVERLAY_DIR}
 
 mkdir -p etc/local.d
-cat << EOF >> etc/local.d/headless.start
+cat << EOF > etc/local.d/headless.start
 #!/bin/sh
 
 __create_eni()
@@ -145,13 +146,13 @@ touch etc/.default_boot_services
 
 mkdir -p etc/runlevels/default
 cd etc/runlevels/default
-ln -s /etc/init.d/local .
+ln -s /etc/init.d/local . 2>/dev/null || true
 cd "${WORKDIR}/${OVERLAY_DIR}"
 tar czvf overlay_ssh.tar.gz etc/
 cd "${WORKDIR}/http"
-ln -s "../${OVERLAY_DIR}/overlay_ssh.tar.gz" overlay.tar.gz
+ln -s "../${OVERLAY_DIR}/overlay_ssh.tar.gz" overlay.tar.gz 2>/dev/null || true
 
-cat << EOF >> python3_httpserver.sh
+cat << EOF > python3_httpserver.sh
 #!/usr/bin/env bash
 sudo python3 -m http.server 80
 EOF
