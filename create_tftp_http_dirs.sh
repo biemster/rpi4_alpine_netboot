@@ -48,15 +48,15 @@ fi
 echo "* preparing TFTP folder"
 cd "${WORKDIR}"
 mkdir -p tftp; cd tftp
-tar xvzf ../${REL_TAR} ./start4.elf # primary bootloader
-tar xvzf ../${REL_TAR} ./fixup4.dat # SDRAM setup
-tar xvzf ../${REL_TAR} ./bcm2711-rpi-4-b.dtb # device tree blob
-tar xvzf ../${REL_TAR} ./boot/vmlinuz-rpi4 # kernel
+tar xvzf "../${REL_TAR}" ./start4.elf # primary bootloader
+tar xvzf "../${REL_TAR}" ./fixup4.dat # SDRAM setup
+tar xvzf "../${REL_TAR}" ./bcm2711-rpi-4-b.dtb # device tree blob
+tar xvzf "../${REL_TAR}" ./boot/vmlinuz-rpi4 # kernel
 ln -s boot/vmlinuz-rpi4 . 2>/dev/null || true
 
 # the initramfs needs af_packet.ko added:
-tar xvzf ../${REL_TAR} ./boot/modloop-rpi4 # kernel modules
-tar xvzf ../${REL_TAR} ./boot/initramfs-rpi4 # initramfs
+tar xvzf "../${REL_TAR}" ./boot/modloop-rpi4 # kernel modules
+tar xvzf "../${REL_TAR}" ./boot/initramfs-rpi4 # initramfs
 mkdir -p modloop-rpi4
 unsquashfs -f -d modloop-rpi4/lib boot/modloop-rpi4 'modules/*/modules.*'
 for mod in "${MODULES_INITRAMFS[@]}"
@@ -89,7 +89,7 @@ chmod +x dnsmasq_tftpserver.sh
 echo "* preparing HTTP folder"
 cd "${WORKDIR}"
 mkdir -p http/apks
-tar xvzf ${REL_TAR} ./apks/
+tar xvzf "${REL_TAR}" ./apks/
 cp -R apks/* http/apks/
 rm -R apks/
 
