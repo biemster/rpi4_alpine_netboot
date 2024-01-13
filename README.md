@@ -2,6 +2,8 @@
 This script will set up two folders, one to be served over TFTP, and the other over HTTP. The rpi4 will boot without SD card, or any storage attached.
 No NFS server is needed, and the Pi will run completely independent of network and storage after booting.
 
+NOTE: this project is abandoned, since I discovered that OpenWRT can generate such netbooting systems for rpi4 with no additional effort.
+
 ### Steps
 The procedure consists of 4 steps:
 1. Prepare the Raspberry Pi 4
